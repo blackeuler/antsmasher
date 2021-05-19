@@ -46,6 +46,7 @@ function create_screen(wd,ht){
         canvas.id = "screen";
         canvas.width = wd;
         canvas.height = ht;
+        canvas.style = "border: black 20px solid"
         return canvas;
     }
     function run_screen(canvas){
@@ -60,13 +61,13 @@ function create_screen(wd,ht){
 }
 
 function place_asset(asset,screen){
-    const img = new Image();
-    //Images dont show for some reason idk?
-    img.onload =function() {
-        screen.ctx.drawImage(img,asset.pos.x,asset.pos.y);
-        document.appendChild(img)
-    }
-
+    // const img = new Image();
+    // //Images dont show for some reason idk?
+    // img.onload =function() {
+    //     screen.ctx.drawImage(img,asset.pos.x,asset.pos.y);
+    //     document.appendChild(img)
+    // }
+    
     screen.ctx.fillRect(
         asset.pos.x, 
         asset.pos.y, 
@@ -85,24 +86,28 @@ function create_score(){
 }
 
 
-function addClickHandler(screen,getAnts,incr_score,incr_ant){
+function addClickHandler(screen,getAnts,incr_score){
     function getMousePosition(event){
-        return {x: event.clientX, y: event.clientY}
+        var rect = screen.canvas.getBoundingClientRect();
+        return {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top
+        };
     }
     function dis(pos,pos2){
-        const xDis = pos.x - pos2.x
-        const yDis = pos.y - pos2.y
+        const xDis = pos2.x - pos.x
+        const yDis = pos2.y - pos.y
         return Math.hypot(xDis , yDis)
     }
     
     screen.canvas.addEventListener('click',(ev) =>{
+        const r = 50;
         const mopos = getMousePosition(ev);
-        const ants = getAnts()
+        const ants = getAnts();
         ants.forEach(ant => {
-            if(dis(ant.pos,mopos) < 20){
-                
-                incr_score()
-                incr_ant()
+            if(dis(mopos,ant.pos) < r){
+                incr_score();
+                //incr_ant()
             }
         });
 
@@ -120,20 +125,20 @@ function start_game(){
     '/Users/blackeuler/antsmasher/assets/ant2.jpeg',
     200,
     20,
-    3,
-    3)]
+    30,
+    30)]
     ants.every(ant => place_asset(ant,screen));
     function get_ants(){
         return ants
     }
     function incr_score(){
         const num = score.innerText;
-        score.innerText =Number.parseInt(num) + 1;
+        score.innerText = Number.parseInt(num) + 1;
     }
     function one_more_ant(){
-        ants.push(create_gasset(20,40,20,20))
+        ants.push(create_gasset(20,40,20,200))
     }
-    addClickHandler(screen,get_ants,incr_score,one_more_ant);
+    addClickHandler(screen,get_ants,incr_score);
 }
 
 
